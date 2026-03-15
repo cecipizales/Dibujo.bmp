@@ -72,12 +72,12 @@ const Intro = ({ onFinish }) => {
   useEffect(() => {
     if (phase === 'video' && videoRef.current) {
       // Extremely strict fallback: if the video phase starts, give the browser
-      // a strict 6 second window to render the video. If the video hangs or is blocked
+      // a strict 15 second window to render the video. If the video hangs or is blocked
       // and doesn't finish, jump to desktop automatically.
       const fallbackTimer = setTimeout(() => {
         console.warn('Video fallback timeout triggered (took too long or hung)');
         safeFinish();
-      }, 6000);
+      }, 15000);
 
       try {
         const playPromise = videoRef.current.play();
