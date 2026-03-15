@@ -69,7 +69,7 @@ export const defaultIconState = [
   {
     id: 6,
     icon: imageIcon,
-    title: 'Dibujo  CECILIA.png',
+    title: 'Dibujo  CECILIA.bmp',
     component: PictureViewer,
     isFocus: false,
     injectProps: { imageUrl: "/images/Dibujo  CECILIA.png" },
@@ -77,7 +77,7 @@ export const defaultIconState = [
   {
     id: 7,
     icon: imageIcon,
-    title: 'Dibujo cumple.png',
+    title: 'Dibujo cumple.bmp',
     component: PictureViewer,
     isFocus: false,
     injectProps: { imageUrl: "/images/Dibujo cumple.png" },
@@ -85,7 +85,7 @@ export const defaultIconState = [
   {
     id: 8,
     icon: imageIcon,
-    title: 'PAint 13.png',
+    title: 'PAint 13.bmp',
     component: PictureViewer,
     isFocus: false,
     injectProps: { imageUrl: "/images/PAint 13.png" },
@@ -93,7 +93,7 @@ export const defaultIconState = [
   {
     id: 9,
     icon: imageIcon,
-    title: 'Paint 1.png',
+    title: 'Paint 1.bmp',
     component: PictureViewer,
     isFocus: false,
     injectProps: { imageUrl: "/images/Paint 1.png" },
@@ -101,7 +101,7 @@ export const defaultIconState = [
   {
     id: 10,
     icon: imageIcon,
-    title: 'Paint 10.png',
+    title: 'Paint 10.bmp',
     component: PictureViewer,
     isFocus: false,
     injectProps: { imageUrl: "/images/Paint 10.png" },
@@ -109,7 +109,7 @@ export const defaultIconState = [
   {
     id: 11,
     icon: imageIcon,
-    title: 'Paint 12.png',
+    title: 'Paint 12.bmp',
     component: PictureViewer,
     isFocus: false,
     injectProps: { imageUrl: "/images/Paint 12.png" },
@@ -117,7 +117,7 @@ export const defaultIconState = [
   {
     id: 12,
     icon: imageIcon,
-    title: 'Paint 5.png',
+    title: 'Paint 5.bmp',
     component: PictureViewer,
     isFocus: false,
     injectProps: { imageUrl: "/images/Paint 5.png" },
@@ -125,7 +125,7 @@ export const defaultIconState = [
   {
     id: 13,
     icon: imageIcon,
-    title: 'Paint 6.png',
+    title: 'Paint 6.bmp',
     component: PictureViewer,
     isFocus: false,
     injectProps: { imageUrl: "/images/Paint 6.png" },
@@ -133,7 +133,7 @@ export const defaultIconState = [
   {
     id: 14,
     icon: imageIcon,
-    title: 'Paint 9.png',
+    title: 'Paint 9.bmp',
     component: PictureViewer,
     isFocus: false,
     injectProps: { imageUrl: "/images/Paint 9.png" },
@@ -141,7 +141,7 @@ export const defaultIconState = [
   {
     id: 15,
     icon: imageIcon,
-    title: 'Painttt.png',
+    title: 'Painttt.bmp',
     component: PictureViewer,
     isFocus: false,
     injectProps: { imageUrl: "/images/Painttt.png" },
