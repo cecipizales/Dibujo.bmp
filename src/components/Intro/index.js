@@ -3,6 +3,7 @@ import styled from 'styled-components';
 
 const Intro = ({ onFinish }) => {
   const [phase, setPhase] = useState('start'); // 'start', 'today', 'rewind', 'video'
+  const [fading, setFading] = useState(false);
   const [displayDate, setDisplayDate] = useState('');
   const videoRef = useRef(null);
   const introFinishedRef = useRef(false);
@@ -106,14 +107,44 @@ const Intro = ({ onFinish }) => {
     safeFinish();
   };
 
+  const handleVideoTimeUpdate = () => {
+    if (videoRef.current) {
+      const { currentTime, duration } = videoRef.current;
+      // Trigger a smooth fade out visual transition during the final 1.2 seconds of the video
+      if (duration && (duration - currentTime) <= 1.2 && !fading) {
+        setFading(true);
+        // Also fade out the volume smoothly on compatible browsers
+        try {
+          let vol = videoRef.current.volume;
+          const fadeInterval = setInterval(() => {
+            if (!videoRef.current) return clearInterval(fadeInterval);
+            vol -= 0.1;
+            if (vol <= 0) {
+              videoRef.current.volume = 0;
+              clearInterval(fadeInterval);
+            } else {
+              videoRef.current.volume = vol;
+            }
+          }, 100);
+        } catch(e) {}
+      }
+    }
+  };
+
   const startSequence = () => {
     if (phase === 'start') {
+      // Force Apple/Safari to authorize the media element immediately inside the touch handler
+      if (videoRef.current) {
+        try {
+          videoRef.current.load();
+        } catch(e) {}
+      }
       setPhase('today');
     }
   };
 
   return (
-    <IntroContainer>
+    <IntroContainer $fade={fading}>
       {/* Absolute skip button to let them escape if they want */}
       {phase !== 'start' && (
         <SkipButton onClick={safeFinish}>[ SKIP INTRO ]</SkipButton>
@@ -136,8 +167,11 @@ const Intro = ({ onFinish }) => {
         ref={videoRef}
         src="/load-desktop-animation.mp4"
         playsInline
+        webkit-playsinline="true"
+        preload="auto"
         onEnded={handleVideoEnd}
         onError={handleVideoError}
+        onTimeUpdate={handleVideoTimeUpdate}
         style={{
           opacity: phase === 'video' ? 1 : 0,
           pointerEvents: phase === 'video' ? 'auto' : 'none',
@@ -160,6 +194,8 @@ const IntroContainer = styled.div`
   align-items: center;
   z-index: 999999;
   overflow: hidden;
+  opacity: ${props => props.$fade ? 0 : 1};
+  transition: opacity 1.2s ease-out;
 `;
 
 const SkipButton = styled.button`
