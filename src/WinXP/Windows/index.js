@@ -68,10 +68,27 @@ const Window = memo(function({
   const dragRef = useRef(null);
   const ref = useRef(null);
   const { width: windowWidth, height: windowHeight } = useWindowSize();
+
+  // Clamp size so the window fits within the current viewport
+  const availW = windowWidth - 8;
+  const availH = windowHeight - 60; // leave room for taskbar
+  const clampedSize = {
+    width: defaultSize.width ? Math.min(defaultSize.width, availW) : defaultSize.width,
+    height: defaultSize.height ? Math.min(defaultSize.height, availH) : defaultSize.height,
+  };
+
+  // Clamp offset so the window doesn't open off-screen
+  const clampedW = clampedSize.width || 0;
+  const clampedH = clampedSize.height || 0;
+  const clampedOffset = {
+    x: Math.min(defaultOffset.x, Math.max(0, windowWidth - clampedW - 4)),
+    y: Math.min(defaultOffset.y, Math.max(0, windowHeight - clampedH - 55)),
+  };
+
   const { offset, size } = useElementResize(ref, {
     dragRef,
-    defaultOffset,
-    defaultSize,
+    defaultOffset: clampedOffset,
+    defaultSize: clampedSize,
     boundary: {
       top: 1,
       right: windowWidth - 1,
