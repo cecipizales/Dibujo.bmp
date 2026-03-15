@@ -225,13 +225,30 @@ function WinXP() {
     const payload = { 
       ...appSetting,
       defaultOffset: { ...appSetting.defaultOffset },
-      header: { ...appSetting.header }
+      defaultSize: { ...appSetting.defaultSize },
+      header: { ...appSetting.header },
+      // Auto-maximize on small/medium screens
+      maximized: appSetting.maximized || window.innerWidth < 1100,
     };
 
     // Add random position perturbation so windows don't perfectly stack
-    const randomOffset = Math.floor(Math.random() * 60) - 30; // Random offset between -30 and +30
+    const randomOffset = Math.floor(Math.random() * 40) - 20;
     payload.defaultOffset.x += randomOffset;
     payload.defaultOffset.y += randomOffset;
+
+    // Clamp size so window fits within the viewport
+    const maxW = window.innerWidth - 10;
+    const maxH = window.innerHeight - 60; // leave room for taskbar
+    if (payload.defaultSize.width > maxW) payload.defaultSize.width = maxW;
+    if (payload.defaultSize.height > maxH) payload.defaultSize.height = maxH;
+
+    // Clamp offset so window doesn't open off-screen
+    const rightEdge = payload.defaultOffset.x + payload.defaultSize.width;
+    const bottomEdge = payload.defaultOffset.y + payload.defaultSize.height;
+    if (rightEdge > window.innerWidth - 5)
+      payload.defaultOffset.x = Math.max(0, window.innerWidth - payload.defaultSize.width - 5);
+    if (bottomEdge > window.innerHeight - 35)
+      payload.defaultOffset.y = Math.max(0, window.innerHeight - payload.defaultSize.height - 35);
 
     if (icon) {
       if (icon.injectProps) {
@@ -278,11 +295,26 @@ function WinXP() {
       const payload = {
         ...appSetting,
         defaultOffset: { ...appSetting.defaultOffset },
+        defaultSize: { ...appSetting.defaultSize },
         header: { ...appSetting.header },
+        maximized: appSetting.maximized || window.innerWidth < 1100,
       };
-      const randomOffset = Math.floor(Math.random() * 60) - 30;
+      const randomOffset = Math.floor(Math.random() * 40) - 20;
       payload.defaultOffset.x += randomOffset;
       payload.defaultOffset.y += randomOffset;
+
+      // Clamp size and position to viewport
+      const maxW = window.innerWidth - 10;
+      const maxH = window.innerHeight - 60;
+      if (payload.defaultSize.width > maxW) payload.defaultSize.width = maxW;
+      if (payload.defaultSize.height > maxH) payload.defaultSize.height = maxH;
+      const rightEdge = payload.defaultOffset.x + payload.defaultSize.width;
+      const bottomEdge = payload.defaultOffset.y + payload.defaultSize.height;
+      if (rightEdge > window.innerWidth - 5)
+        payload.defaultOffset.x = Math.max(0, window.innerWidth - payload.defaultSize.width - 5);
+      if (bottomEdge > window.innerHeight - 35)
+        payload.defaultOffset.y = Math.max(0, window.innerHeight - payload.defaultSize.height - 35);
+
       dispatch({ type: ADD_APP, payload });
     }
   }
