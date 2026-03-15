@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import styled, { keyframes } from 'styled-components';
 
 const Intro = ({ onFinish }) => {
-  const [phase, setPhase] = useState('today'); // 'today', 'rewind', 'video'
+  const [phase, setPhase] = useState('start'); // 'start', 'today', 'rewind', 'video'
   const [displayDate, setDisplayDate] = useState('');
   const videoRef = useRef(null);
 
@@ -21,7 +21,9 @@ const Intro = ({ onFinish }) => {
 
     let timerId;
 
-    if (phase === 'today') {
+    if (phase === 'start') {
+      // Wait for user interaction to satisfy browser autoplay policies for audio
+    } else if (phase === 'today') {
       // Hold on today's date for 2 seconds
       timerId = setTimeout(() => {
         setPhase('rewind');
@@ -80,15 +82,21 @@ const Intro = ({ onFinish }) => {
   };
 
   const handleSkip = () => {
-    onFinish();
+    if (phase === 'start') {
+      setPhase('today'); // Initial click starts the animation
+    } else {
+      onFinish(); // Any subsequent click skips the intro
+    }
   };
 
   return (
     <IntroContainer onClick={handleSkip}>
+      {phase === 'start' && (
+        <StartPrompt>[ CLICK TO INITIATE SEQUENCE ]</StartPrompt>
+      )}
       {(phase === 'today' || phase === 'rewind') && (
         <DateDisplay>
           {displayDate}
-          <Cursor />
         </DateDisplay>
       )}
       {phase === 'video' && (
@@ -96,7 +104,6 @@ const Intro = ({ onFinish }) => {
           ref={videoRef}
           src="/load-desktop-animation.mp4"
           autoPlay
-          muted
           playsInline
           onEnded={handleVideoEnd}
           onError={handleVideoError}
@@ -121,19 +128,21 @@ const IntroContainer = styled.div`
   cursor: pointer; /* Signal to user that they can click to skip */
 `;
 
-const blink = keyframes`
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0; }
-`;
+const StartPrompt = styled.div`
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 2vw;
+  color: #888;
+  letter-spacing: 0.2em;
+  animation: pulse 1.5s infinite;
 
-const Cursor = styled.span`
-  display: inline-block;
-  width: 0.6em;
-  height: 1.1em;
-  background-color: #e0e0e0;
-  vertical-align: text-bottom;
-  animation: ${blink} 1s step-end infinite;
-  margin-left: 4px;
+  @media (max-width: 768px) {
+    font-size: 4vw;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 1; }
+  }
 `;
 
 const DateDisplay = styled.div`
