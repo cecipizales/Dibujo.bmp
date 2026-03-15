@@ -141,6 +141,7 @@ const Container = styled.footer`
     #1941a5 98%
   );
   position: absolute;
+  z-index: 10000;
   bottom: 0;
   right: 0;
   left: 0;
@@ -148,7 +149,7 @@ const Container = styled.footer`
   .footer__items.left {
     height: 100%;
     flex: 1;
-    overflow: hidden;
+    overflow: visible; /* Don't clip the Start Menu */
   }
   .footer__items.right {
     background-color: #0b77e9;
@@ -194,6 +195,7 @@ const Container = styled.footer`
     left: 0;
     box-shadow: 2px 4px 2px rgba(0, 0, 0, 0.5);
     bottom: 100%;
+    z-index: 10001;
   }
   .footer__window {
     flex: 1;

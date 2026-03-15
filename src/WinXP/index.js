@@ -215,11 +215,34 @@ function WinXP() {
   function onMouseDownIcon(id) {
     dispatch({ type: FOCUS_ICON, payload: id });
   }
-  function onDoubleClickIcon(component) {
+  function onDoubleClickIcon(id, component) {
     const appSetting = Object.values(appSettings).find(
       setting => setting.component === component,
     );
-    dispatch({ type: ADD_APP, payload: appSetting });
+    const icon = state.icons.find(i => i.id === id);
+    
+    // Use a clean copy that preserves function/component references
+    const payload = { 
+      ...appSetting,
+      defaultOffset: { ...appSetting.defaultOffset },
+      header: { ...appSetting.header }
+    };
+
+    // Add random position perturbation so windows don't perfectly stack
+    const randomOffset = Math.floor(Math.random() * 60) - 30; // Random offset between -30 and +30
+    payload.defaultOffset.x += randomOffset;
+    payload.defaultOffset.y += randomOffset;
+
+    if (icon) {
+      if (icon.injectProps) {
+        payload.injectProps = { 
+          ...(payload.injectProps || {}), 
+          ...icon.injectProps 
+        };
+      }
+      if (icon.title) payload.header = { ...payload.header, title: icon.title };
+    }
+    dispatch({ type: ADD_APP, payload });
   }
   function getFocusedAppId() {
     if (state.focusing !== FOCUSING.WINDOW) return -1;
@@ -232,30 +255,36 @@ function WinXP() {
     dispatch({ type: FOCUS_DESKTOP });
   }
   function onClickMenuItem(o) {
-    if (o === 'Internet')
-      dispatch({ type: ADD_APP, payload: appSettings['Internet Explorer'] });
-    else if (o === 'Minesweeper')
-      dispatch({ type: ADD_APP, payload: appSettings.Minesweeper });
-    else if (o === 'My Computer')
-      dispatch({ type: ADD_APP, payload: appSettings['My Computer'] });
-    else if (o === 'Notepad')
-      dispatch({ type: ADD_APP, payload: appSettings.Notepad });
-    else if (o === 'Winamp')
-      dispatch({ type: ADD_APP, payload: appSettings.Winamp });
-    else if (o === 'Paint')
-      dispatch({ type: ADD_APP, payload: appSettings.Paint });
-    else if (o === 'Log Off')
+    let appSetting;
+    if (o === 'Internet') appSetting = appSettings['Internet Explorer'];
+    else if (o === 'Minesweeper') appSetting = appSettings.Minesweeper;
+    else if (o === 'My Computer') appSetting = appSettings['My Computer'];
+    else if (o === 'Notepad') appSetting = appSettings.Notepad;
+    else if (o === 'Paint') appSetting = appSettings.Paint;
+    else if (o === 'Log Off') {
       dispatch({ type: POWER_OFF, payload: POWER_STATE.LOG_OFF });
-    else if (o === 'Turn Off Computer')
+      return;
+    } else if (o === 'Turn Off Computer') {
       dispatch({ type: POWER_OFF, payload: POWER_STATE.TURN_OFF });
-    else
-      dispatch({
-        type: ADD_APP,
-        payload: {
-          ...appSettings.Error,
-          injectProps: { message: 'C:\\\nApplication not found' },
-        },
-      });
+      return;
+    } else {
+      appSetting = {
+        ...appSettings.Error,
+        injectProps: { message: 'C:\\\nApplication not found' },
+      };
+    }
+
+    if (appSetting) {
+      const payload = {
+        ...appSetting,
+        defaultOffset: { ...appSetting.defaultOffset },
+        header: { ...appSetting.header },
+      };
+      const randomOffset = Math.floor(Math.random() * 60) - 30;
+      payload.defaultOffset.x += randomOffset;
+      payload.defaultOffset.y += randomOffset;
+      dispatch({ type: ADD_APP, payload });
+    }
   }
   function onMouseDownDesktop(e) {
     if (e.target === e.currentTarget)

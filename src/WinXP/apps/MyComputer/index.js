@@ -207,61 +207,7 @@ function MyComputer({ onClose }) {
                 </div>
               </div>
             </div>
-            <div className="com__content__left__card">
-              <div className="com__content__left__card__header">
-                <div className="com__content__left__card__header__text">
-                  Details
-                </div>
-                <img
-                  src={pullup}
-                  alt=""
-                  className="com__content__left__card__header__img"
-                />
-              </div>
-              <div className="com__content__left__card__content">
-                <div className="com__content__left__card__row">
-                  <iframe
-                    title="ghbtn"
-                    style={{ margin: '0 0 3px -1px', height: '30px' }}
-                    src="https://ghbtns.com/github-btn.html?user=ShizukuIchi&repo=winXP&type=star&count=true&size=large"
-                    frameBorder="0"
-                    scrolling="0"
-                    width="170px"
-                    height="20px"
-                  />
-                </div>
-                <div className="com__content__left__card__row">
-                  <img
-                    className="com__content__left__card__img"
-                    src="https://cdn.iconscout.com/icon/free/png-256/medium-1425876-1205067.png"
-                    alt="control"
-                  />
-                  <a
-                    href="https://medium.com/@ShizukuIchi"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="com__content__left__card__text link"
-                  >
-                    Medium
-                  </a>
-                </div>
-                <div className="com__content__left__card__row">
-                  <img
-                    className="com__content__left__card__img"
-                    src={mine}
-                    alt="control"
-                  />
-                  <a
-                    href="https://github.com/ShizukuIchi/minesweeper"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="com__content__left__card__text link"
-                  >
-                    Minesweeper
-                  </a>
-                </div>
-              </div>
-            </div>
+
           </div>
           <div className="com__content__right">
             <div className="com__content__right__card">
@@ -339,31 +285,31 @@ function MyComputer({ onClose }) {
               </div>
               <div className="com__content__right__card__content">
                 <a
-                  href="https://github.com/ShizukuIchi"
+                  href="https://ceci.design/"
                   target="_blank"
                   rel="noreferrer"
                   className="com__content__right__card__item--me"
                 >
                   <img
                     className="com__content__right__card__img"
-                    src={logo}
-                    alt="control"
+                    src={`${process.env.PUBLIC_URL}/images/CD.png`}
+                    alt="Portfolio"
                   />
-                  <div className="com__content__right__card__text">Github</div>
+                  <div className="com__content__right__card__text">Portfolio</div>
                 </a>
                 <a
-                  href="https://sh1zuku.csie.io"
+                  href="https://www.linkedin.com/in/ceci-design/"
                   target="_blank"
                   rel="noreferrer"
                   className="com__content__right__card__item--me"
                 >
                   <img
                     className="com__content__right__card__img"
-                    src="https://a.ppy.sh/2926513_1448497605.png"
-                    alt="control"
+                    src={`${process.env.PUBLIC_URL}/images/linkedin.png`}
+                    alt="LinkedIn"
                   />
                   <div className="com__content__right__card__text">
-                    My Website
+                    LinkedIn
                   </div>
                 </a>
               </div>

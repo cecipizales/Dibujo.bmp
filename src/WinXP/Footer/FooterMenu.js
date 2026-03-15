@@ -40,8 +40,8 @@ function FooterMenu({ className, onClick }) {
   return (
     <div className={className}>
       <header>
-        <img className="header__img" src={user} alt="avatar" />
-        <span className="header__text">User</span>
+        <img className="header__img" src="/images/profile picture.png" alt="avatar" />
+        <span className="header__text">Ceci</span>
       </header>
       <section className="menu" onMouseOver={onMouseOver}>
         <hr className="orange-hr" />
@@ -58,7 +58,6 @@ function FooterMenu({ className, onClick }) {
             items={[
               { icon: mine, text: 'Minesweeper' },
               { icon: notepad, text: 'Notepad' },
-              { icon: winamp, text: 'Winamp' },
               { icon: paint, text: 'Paint' },
               { icon: mediaPlayer, text: 'Windows Media Player' },
               { icon: messenger, text: 'Windows Messenger' },
@@ -342,6 +341,7 @@ export default styled(FooterMenu)`
     display: flex;
     margin: 0 2px;
     position: relative;
+    background-color: #fff;
     border-top: 1px solid #385de7;
     box-shadow: 0 1px #385de7;
   }

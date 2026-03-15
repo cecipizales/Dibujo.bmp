@@ -14,7 +14,7 @@ function Windows({
   focusedAppId,
 }) {
   return (
-    <div style={{ position: 'relative', zIndex: 0 }}>
+    <div style={{ position: 'relative', zIndex: 10, pointerEvents: 'none' }}>
       {apps.map(app => (
         <StyledWindow
           show={!app.minimized}
@@ -144,6 +144,7 @@ const Window = memo(function({
 const StyledWindow = styled(Window)`
   display: ${({ show }) => (show ? 'flex' : 'none')};
   position: absolute;
+  pointer-events: auto; /* Re-enable pointer events for the window itself */
   padding: 3px;
   padding: ${({ header }) => (header.invisible ? 0 : 3)}px;
   background-color: ${({ isFocus }) => (isFocus ? '#0831d9' : '#6582f5')};

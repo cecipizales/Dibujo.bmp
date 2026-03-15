@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "name": "winXP",
+  "name": "winxp",
   "builds": [
     {
       "src": "package.json",
@@ -9,6 +9,7 @@
     }
   ],
   "routes": [
+    { "handle": "filesystem" },
     {
       "src": "/static/(.*)",
       "headers": { "cache-control": "s-maxage=31536000,immutable" },
@@ -23,5 +24,5 @@
       "dest": "/index.html"
     }
   ],
-  "alias": ["windowsxp.now.sh", "winxp.now.sh"]
+  "alias": ["dibujo-bmp.vercel.app"]
 }

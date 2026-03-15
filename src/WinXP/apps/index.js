@@ -5,6 +5,7 @@ import MyComputer from './MyComputer';
 import Notepad from './Notepad';
 import Winamp from './Winamp';
 import Paint from './Paint';
+import PictureViewer from './PictureViewer';
 import iePaper from 'assets/windowsIcons/ie-paper.png';
 import ie from 'assets/windowsIcons/ie.png';
 import mine from 'assets/minesweeper/mine-icon.png';
@@ -16,6 +17,7 @@ import notepadLarge from 'assets/windowsIcons/327(32x32).png';
 import winamp from 'assets/windowsIcons/winamp.png';
 import paintLarge from 'assets/windowsIcons/680(32x32).png';
 import paint from 'assets/windowsIcons/680(16x16).png';
+import imageIcon from 'assets/windowsIcons/image-icon.png';
 
 const gen = () => {
   let id = -1;
@@ -26,89 +28,7 @@ const gen = () => {
 };
 const genId = gen();
 const genIndex = gen();
-export const defaultAppState = [
-  {
-    component: InternetExplorer,
-    header: {
-      title: 'Internet Explorer',
-      icon: iePaper,
-    },
-    defaultSize: {
-      width: 700,
-      height: 500,
-    },
-    defaultOffset: {
-      x: 130,
-      y: 20,
-    },
-    resizable: true,
-    minimized: false,
-    maximized: window.innerWidth < 800,
-    id: genId(),
-    zIndex: genIndex(),
-  },
-  {
-    component: Minesweeper,
-    header: {
-      title: 'Minesweeper',
-      icon: mine,
-    },
-    defaultSize: {
-      width: 0,
-      height: 0,
-    },
-    defaultOffset: {
-      x: 180,
-      y: 170,
-    },
-    resizable: false,
-    minimized: false,
-    maximized: false,
-    id: genId(),
-    zIndex: genIndex(),
-  },
-  {
-    component: Winamp,
-    header: {
-      title: 'Winamp',
-      icon: winamp,
-      invisible: true,
-    },
-    defaultSize: {
-      width: 0,
-      height: 0,
-    },
-    defaultOffset: {
-      x: 0,
-      y: 0,
-    },
-    resizable: false,
-    minimized: false,
-    maximized: false,
-    id: genId(),
-    zIndex: genIndex(),
-  },
-  {
-    component: MyComputer,
-    header: {
-      title: 'My Computer',
-      icon: computer,
-    },
-    defaultSize: {
-      width: 660,
-      height: 500,
-    },
-    defaultOffset: {
-      x: 250,
-      y: 40,
-    },
-    resizable: true,
-    minimized: false,
-    maximized: window.innerWidth < 800,
-    id: genId(),
-    zIndex: genIndex(),
-  },
-];
+export const defaultAppState = [];
 
 export const defaultIconState = [
   {
@@ -140,18 +60,91 @@ export const defaultIconState = [
     isFocus: false,
   },
   {
-    id: 4,
-    icon: winamp,
-    title: 'Winamp',
-    component: Winamp,
-    isFocus: false,
-  },
-  {
     id: 5,
     icon: paintLarge,
     title: 'Paint',
     component: Paint,
     isFocus: false,
+  },
+  {
+    id: 6,
+    icon: imageIcon,
+    title: 'Dibujo  CECILIA.png',
+    component: PictureViewer,
+    isFocus: false,
+    injectProps: { imageUrl: "/images/Dibujo  CECILIA.png" },
+  },
+  {
+    id: 7,
+    icon: imageIcon,
+    title: 'Dibujo cumple.png',
+    component: PictureViewer,
+    isFocus: false,
+    injectProps: { imageUrl: "/images/Dibujo cumple.png" },
+  },
+  {
+    id: 8,
+    icon: imageIcon,
+    title: 'PAint 13.png',
+    component: PictureViewer,
+    isFocus: false,
+    injectProps: { imageUrl: "/images/PAint 13.png" },
+  },
+  {
+    id: 9,
+    icon: imageIcon,
+    title: 'Paint 1.png',
+    component: PictureViewer,
+    isFocus: false,
+    injectProps: { imageUrl: "/images/Paint 1.png" },
+  },
+  {
+    id: 10,
+    icon: imageIcon,
+    title: 'Paint 10.png',
+    component: PictureViewer,
+    isFocus: false,
+    injectProps: { imageUrl: "/images/Paint 10.png" },
+  },
+  {
+    id: 11,
+    icon: imageIcon,
+    title: 'Paint 12.png',
+    component: PictureViewer,
+    isFocus: false,
+    injectProps: { imageUrl: "/images/Paint 12.png" },
+  },
+  {
+    id: 12,
+    icon: imageIcon,
+    title: 'Paint 5.png',
+    component: PictureViewer,
+    isFocus: false,
+    injectProps: { imageUrl: "/images/Paint 5.png" },
+  },
+  {
+    id: 13,
+    icon: imageIcon,
+    title: 'Paint 6.png',
+    component: PictureViewer,
+    isFocus: false,
+    injectProps: { imageUrl: "/images/Paint 6.png" },
+  },
+  {
+    id: 14,
+    icon: imageIcon,
+    title: 'Paint 9.png',
+    component: PictureViewer,
+    isFocus: false,
+    injectProps: { imageUrl: "/images/Paint 9.png" },
+  },
+  {
+    id: 15,
+    icon: imageIcon,
+    title: 'Painttt.png',
+    component: PictureViewer,
+    isFocus: false,
+    injectProps: { imageUrl: "/images/Painttt.png" },
   },
 ];
 
@@ -292,6 +285,25 @@ export const appSettings = {
     maximized: window.innerWidth < 800,
     multiInstance: true,
   },
+  PictureViewer: {
+    header: {
+      icon: imageIcon,
+      title: 'Windows Picture and Fax Viewer',
+    },
+    component: PictureViewer,
+    defaultSize: {
+      width: 660,
+      height: 500,
+    },
+    defaultOffset: {
+      x: 300,
+      y: 90,
+    },
+    resizable: true,
+    minimized: false,
+    maximized: window.innerWidth < 800,
+    multiInstance: true,
+  },
 };
 
-export { InternetExplorer, Minesweeper, ErrorBox, MyComputer, Notepad, Winamp };
+export { InternetExplorer, Minesweeper, ErrorBox, MyComputer, Notepad, Winamp, PictureViewer };

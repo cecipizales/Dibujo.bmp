@@ -60,7 +60,7 @@ function Icon({
     onMouseDown(id);
   }
   function _onDoubleClick() {
-    onDoubleClick(component);
+    onDoubleClick(id, component);
   }
   useEffect(() => {
     const target = ref.current;
@@ -91,6 +91,13 @@ const IconsContainer = styled.div`
   position: absolute;
   margin-top: 40px;
   margin-left: 40px;
+  display: grid;
+  grid-template-rows: repeat(auto-fill, minmax(80px, 1fr));
+  grid-auto-flow: column;
+  column-gap: 5px;
+  row-gap: 5px;
+  height: calc(100% - 80px); /* Use percentage for better containment */
+  z-index: 1; 
 `;
 
 const StyledIcon = styled(Icon)`

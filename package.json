@@ -1,5 +1,5 @@
 {
-  "name": "winXP",
+  "name": "winxp",
   "version": "0.1.0",
   "private": true,
   "author": "ShizukuIchi <shizukuichi@gmail.com>",
@@ -10,15 +10,15 @@
     "react-dom": "^16.8.6",
     "react-scripts": "^5.0.1",
     "react-use": "^7.0.1",
-    "styled-components": "^4.2.0",
+    "styled-components": "^6.3.11",
     "webamp": "^1.3.2-beta.2"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
+    "start": "DISABLE_ESLINT_PLUGIN=true react-scripts start",
+    "build": "DISABLE_ESLINT_PLUGIN=true react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "now-build": "react-scripts build",
+    "now-build": "DISABLE_ESLINT_PLUGIN=true react-scripts build",
     "lint": "eslint src"
   },
   "eslintConfig": {
