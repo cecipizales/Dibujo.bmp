@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 function useElementResize(ref, options) {
   const {
@@ -11,6 +11,40 @@ function useElementResize(ref, options) {
   } = options;
   const [offset, setOffset] = useState(defaultOffset);
   const [size, setSize] = useState(defaultSize);
+
+  // Keep refs in sync so the resize-clamp effect can read current values
+  // without stale closures
+  const sizeRef = useRef(size);
+  const offsetRef = useRef(offset);
+  useEffect(() => { sizeRef.current = size; }, [size]);
+  useEffect(() => { offsetRef.current = offset; }, [offset]);
+
+  // Re-clamp size + position whenever the viewport (boundary) changes,
+  // so already-open windows respond to live browser resizing
+  useEffect(() => {
+    const currentSize = sizeRef.current;
+    const currentOffset = offsetRef.current;
+    const maxW = boundary.right - boundary.left;
+    const maxH = boundary.bottom - boundary.top;
+
+    const newWidth = currentSize.width ? Math.min(currentSize.width, maxW) : currentSize.width;
+    const newHeight = currentSize.height ? Math.min(currentSize.height, maxH) : currentSize.height;
+
+    if (newWidth !== currentSize.width || newHeight !== currentSize.height) {
+      setSize({ width: newWidth, height: newHeight });
+    }
+
+    const clampedW = newWidth || 0;
+    const clampedH = newHeight || 0;
+    const newX = Math.min(currentOffset.x, Math.max(boundary.left, boundary.right - clampedW - 4));
+    const newY = Math.min(currentOffset.y, Math.max(boundary.top, boundary.bottom - clampedH - 4));
+
+    if (newX !== currentOffset.x || newY !== currentOffset.y) {
+      setOffset({ x: newX, y: newY });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [boundary.right, boundary.bottom, boundary.left, boundary.top]);
+
   const cursorPos = useCursor(ref, resizeThreshold, resizable);
   useEffect(() => {
     const target = ref.current;
