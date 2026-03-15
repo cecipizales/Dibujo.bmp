@@ -1,9 +1,8 @@
 import React from 'react';
-
-import WinXP from 'WinXP';
+import Scene from './Scene';
 
 const App = () => {
-  return <WinXP />;
+  return <Scene />;
 };
 
 export default App;
