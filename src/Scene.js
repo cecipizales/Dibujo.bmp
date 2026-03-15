@@ -11,10 +11,10 @@ const H = 1080;
 const DEBUG_SCREEN = true;
 
 const SCREEN = {
-  left:   568,
-  top:    128,
-  width:  340,
-  height: 256,
+  left:   610,
+  top:    160,
+  width:  694,
+  height: 522,
 };
 
 function Scene() {
