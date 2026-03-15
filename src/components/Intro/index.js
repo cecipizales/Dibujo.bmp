@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import styled, { keyframes } from 'styled-components';
+import styled from 'styled-components';
 
 const Intro = ({ onFinish }) => {
   const [phase, setPhase] = useState('start'); // 'start', 'today', 'rewind', 'video'
   const [displayDate, setDisplayDate] = useState('');
   const videoRef = useRef(null);
+  const introFinishedRef = useRef(false);
 
   useEffect(() => {
     // Format date as MM-DD-YYYY
@@ -59,33 +60,55 @@ const Intro = ({ onFinish }) => {
     return () => clearTimeout(timerId);
   }, [phase]);
 
-  // Attempt to manually trigger play and catch any blockages
+  // Attempt to play video precisely when phase switches to 'video'
   useEffect(() => {
     if (phase === 'video' && videoRef.current) {
       const playPromise = videoRef.current.play();
       if (playPromise !== undefined) {
         playPromise.catch((error) => {
-          console.error("Auto-play was blocked or failed:", error);
-          onFinish(); // Instantly skip if video gets blocked
+          console.error("Auto-play was blocked or failed during phase video:", error);
+          if (!introFinishedRef.current) {
+            introFinishedRef.current = true;
+            onFinish(); // Instantly skip if video gets blocked
+          }
         });
       }
     }
   }, [phase, onFinish]);
 
+  const safeFinish = () => {
+    if (!introFinishedRef.current) {
+      introFinishedRef.current = true;
+      onFinish();
+    }
+  };
+
   const handleVideoEnd = () => {
-    onFinish();
+    console.log("Video ended normally.");
+    safeFinish();
   };
 
   const handleVideoError = () => {
-    console.error("Video failed to load.");
-    onFinish(); // Instantly skip if video fails to load (e.g. 404)
+    console.error("Video failed to load completely.");
+    safeFinish();
   };
 
   const handleSkip = () => {
     if (phase === 'start') {
+      // Direct user action tick.
+      // We UNLOCK the video element here so it's allowed to play unmuted later.
+      if (videoRef.current) {
+        videoRef.current.play().then(() => {
+          // Immediately pause it, we just wanted to unlock it and buffer
+          videoRef.current.pause();
+          videoRef.current.currentTime = 0;
+        }).catch(err => {
+          console.warn("Pre-play unlock failed, but continuing:", err);
+        });
+      }
       setPhase('today'); // Initial click starts the animation
     } else {
-      onFinish(); // Any subsequent click skips the intro
+      safeFinish(); // Any subsequent click skips the intro completely
     }
   };
 
@@ -99,16 +122,18 @@ const Intro = ({ onFinish }) => {
           {displayDate}
         </DateDisplay>
       )}
-      {phase === 'video' && (
-        <VideoPlayer
-          ref={videoRef}
-          src="/load-desktop-animation.mp4"
-          autoPlay
-          playsInline
-          onEnded={handleVideoEnd}
-          onError={handleVideoError}
-        />
-      )}
+      <VideoPlayer
+        ref={videoRef}
+        src="/load-desktop-animation.mp4"
+        playsInline
+        onEnded={handleVideoEnd}
+        onError={handleVideoError}
+        style={{
+          opacity: phase === 'video' ? 1 : 0,
+          pointerEvents: phase === 'video' ? 'auto' : 'none',
+          position: phase === 'video' ? 'relative' : 'absolute'
+        }}
+      />
     </IntroContainer>
   );
 };
