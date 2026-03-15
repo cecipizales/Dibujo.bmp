@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import styled from 'styled-components';
+import styled, { keyframes } from 'styled-components';
 
 const Intro = ({ onFinish }) => {
   const [phase, setPhase] = useState('today'); // 'today', 'rewind', 'video'
@@ -57,14 +57,39 @@ const Intro = ({ onFinish }) => {
     return () => clearTimeout(timerId);
   }, [phase]);
 
+  // Attempt to manually trigger play and catch any blockages
+  useEffect(() => {
+    if (phase === 'video' && videoRef.current) {
+      const playPromise = videoRef.current.play();
+      if (playPromise !== undefined) {
+        playPromise.catch((error) => {
+          console.error("Auto-play was blocked or failed:", error);
+          onFinish(); // Instantly skip if video gets blocked
+        });
+      }
+    }
+  }, [phase, onFinish]);
+
   const handleVideoEnd = () => {
     onFinish();
   };
 
+  const handleVideoError = () => {
+    console.error("Video failed to load.");
+    onFinish(); // Instantly skip if video fails to load (e.g. 404)
+  };
+
+  const handleSkip = () => {
+    onFinish();
+  };
+
   return (
-    <IntroContainer>
+    <IntroContainer onClick={handleSkip}>
       {(phase === 'today' || phase === 'rewind') && (
-        <DateDisplay>{displayDate}</DateDisplay>
+        <DateDisplay>
+          {displayDate}
+          <Cursor />
+        </DateDisplay>
       )}
       {phase === 'video' && (
         <VideoPlayer
@@ -74,6 +99,7 @@ const Intro = ({ onFinish }) => {
           muted
           playsInline
           onEnded={handleVideoEnd}
+          onError={handleVideoError}
         />
       )}
     </IntroContainer>
@@ -92,18 +118,33 @@ const IntroContainer = styled.div`
   align-items: center;
   z-index: 999999;
   overflow: hidden;
+  cursor: pointer; /* Signal to user that they can click to skip */
+`;
+
+const blink = keyframes`
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+`;
+
+const Cursor = styled.span`
+  display: inline-block;
+  width: 0.6em;
+  height: 1.1em;
+  background-color: #e0e0e0;
+  vertical-align: text-bottom;
+  animation: ${blink} 1s step-end infinite;
+  margin-left: 4px;
 `;
 
 const DateDisplay = styled.div`
   font-family: 'Courier New', Courier, monospace;
-  font-size: 8vw;
-  color: #0f0;
-  text-shadow: 0 0 15px #0f0, 0 0 5px #0f0;
-  letter-spacing: 0.1em;
-  font-weight: bold;
+  font-size: 5vw;
+  color: #e0e0e0;
+  letter-spacing: 0.15em;
+  font-weight: normal;
   
   @media (max-width: 768px) {
-    font-size: 15vw;
+    font-size: 8vw;
   }
 `;
 
