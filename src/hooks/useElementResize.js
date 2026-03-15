@@ -12,36 +12,28 @@ function useElementResize(ref, options) {
   const [offset, setOffset] = useState(defaultOffset);
   const [size, setSize] = useState(defaultSize);
 
-  // Keep refs in sync so the resize-clamp effect can read current values
-  // without stale closures
-  const sizeRef = useRef(size);
-  const offsetRef = useRef(offset);
-  useEffect(() => { sizeRef.current = size; }, [size]);
-  useEffect(() => { offsetRef.current = offset; }, [offset]);
+  // naturalSizeRef / naturalOffsetRef track the user's INTENDED size/position
+  // (never overwritten by clamping). This lets windows restore when viewport grows back.
+  const naturalSizeRef = useRef({ ...defaultSize });
+  const naturalOffsetRef = useRef({ ...defaultOffset });
 
-  // Re-clamp size + position whenever the viewport (boundary) changes,
-  // so already-open windows respond to live browser resizing
+  // Re-clamp size + position whenever the viewport (boundary) changes.
+  // Reads from naturalRefs so the window can grow back when viewport grows.
   useEffect(() => {
-    const currentSize = sizeRef.current;
-    const currentOffset = offsetRef.current;
+    const nat = naturalSizeRef.current;
+    const natOff = naturalOffsetRef.current;
     const maxW = boundary.right - boundary.left;
     const maxH = boundary.bottom - boundary.top;
 
-    const newWidth = currentSize.width ? Math.min(currentSize.width, maxW) : currentSize.width;
-    const newHeight = currentSize.height ? Math.min(currentSize.height, maxH) : currentSize.height;
-
-    if (newWidth !== currentSize.width || newHeight !== currentSize.height) {
-      setSize({ width: newWidth, height: newHeight });
-    }
+    const newWidth = nat.width ? Math.min(nat.width, maxW) : nat.width;
+    const newHeight = nat.height ? Math.min(nat.height, maxH) : nat.height;
+    setSize({ width: newWidth, height: newHeight });
 
     const clampedW = newWidth || 0;
     const clampedH = newHeight || 0;
-    const newX = Math.min(currentOffset.x, Math.max(boundary.left, boundary.right - clampedW - 4));
-    const newY = Math.min(currentOffset.y, Math.max(boundary.top, boundary.bottom - clampedH - 4));
-
-    if (newX !== currentOffset.x || newY !== currentOffset.y) {
-      setOffset({ x: newX, y: newY });
-    }
+    const newX = Math.min(natOff.x, Math.max(boundary.left, boundary.right - clampedW - 4));
+    const newY = Math.min(natOff.y, Math.max(boundary.top, boundary.bottom - clampedH - 4));
+    setOffset({ x: newX, y: newY });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [boundary.right, boundary.bottom, boundary.left, boundary.top]);
 
@@ -58,6 +50,9 @@ function useElementResize(ref, options) {
     cover.style.bottom = 0;
     const previousOffset = { ...offset };
     const previousSize = { ...size };
+    // Wrappers that keep naturalRefs in sync with user-initiated changes
+    function _setOffset(o) { naturalOffsetRef.current = o; setOffset(o); }
+    function _setSize(s) { naturalSizeRef.current = s; setSize(s); }
     let _boundary;
     let originMouseX;
     let originMouseY;
@@ -70,7 +65,7 @@ function useElementResize(ref, options) {
       const { pageX, pageY } = getComputedPagePosition(e, _boundary);
       const x = pageX - originMouseX + previousOffset.x;
       const y = pageY - originMouseY + previousOffset.y;
-      setOffset({ x, y });
+      _setOffset({ x, y });
     }
     function onDragEnd(e) {
       cover.remove();
@@ -89,7 +84,7 @@ function useElementResize(ref, options) {
       const { pageY } = getComputedPagePosition(e, _boundary);
       const { x } = previousOffset;
       const y = pageY - originMouseY + previousOffset.y;
-      setOffset({ x, y });
+      _setOffset({ x, y });
     }
     function onDragEndTop(e) {
       const { pageY } = getComputedPagePosition(e, _boundary);
@@ -105,7 +100,7 @@ function useElementResize(ref, options) {
       const { pageX } = getComputedPagePosition(e, _boundary);
       const x = pageX - originMouseX + previousOffset.x;
       const { y } = previousOffset;
-      setOffset({ x, y });
+      _setOffset({ x, y });
     }
     function onDragEndLeft(e) {
       const { pageX } = getComputedPagePosition(e, _boundary);
@@ -121,7 +116,7 @@ function useElementResize(ref, options) {
       const { pageX } = getComputedPagePosition(e, _boundary);
       const width = pageX - originMouseX + previousSize.width;
       const { height } = previousSize;
-      setSize({ width, height });
+      _setSize({ width, height });
     }
     function onResizeEndRight(e) {
       const { pageX } = getComputedPagePosition(e, _boundary);
@@ -137,7 +132,7 @@ function useElementResize(ref, options) {
       const { pageY } = getComputedPagePosition(e, _boundary);
       const { width } = previousSize;
       const height = pageY - originMouseY + previousSize.height;
-      setSize({ width, height });
+      _setSize({ width, height });
     }
     function onResizeEndBottom(e) {
       const { pageY } = getComputedPagePosition(e, _boundary);
@@ -153,7 +148,7 @@ function useElementResize(ref, options) {
       const { pageX } = getComputedPagePosition(e, _boundary);
       const width = -pageX + originMouseX + previousSize.width;
       const { height } = previousSize;
-      setSize({ width, height });
+      _setSize({ width, height });
     }
     function onResizeEndLeft(e) {
       const { pageX } = getComputedPagePosition(e, _boundary);
@@ -169,7 +164,7 @@ function useElementResize(ref, options) {
       const { pageY } = getComputedPagePosition(e, _boundary);
       const height = -pageY + originMouseY + previousSize.height;
       const { width } = previousSize;
-      setSize({ width, height });
+      _setSize({ width, height });
     }
     function onResizeEndTop(e) {
       const { pageY } = getComputedPagePosition(e, _boundary);
@@ -185,7 +180,7 @@ function useElementResize(ref, options) {
       const { pageX, pageY } = getComputedPagePosition(e, _boundary);
       const width = -pageX + originMouseX + previousSize.width;
       const height = -pageY + originMouseY + previousSize.height;
-      setSize({ width, height });
+      _setSize({ width, height });
     }
     function onResizeEndTopLeft(e) {
       const { pageX, pageY } = getComputedPagePosition(e, _boundary);
@@ -202,7 +197,7 @@ function useElementResize(ref, options) {
       const { pageX, pageY } = getComputedPagePosition(e, _boundary);
       const width = pageX - originMouseX + previousSize.width;
       const height = -pageY + originMouseY + previousSize.height;
-      setSize({ width, height });
+      _setSize({ width, height });
     }
     function onResizeEndTopRight(e) {
       const { pageX, pageY } = getComputedPagePosition(e, _boundary);
@@ -219,7 +214,7 @@ function useElementResize(ref, options) {
       const { pageX, pageY } = getComputedPagePosition(e, _boundary);
       const width = -pageX + originMouseX + previousSize.width;
       const height = pageY - originMouseY + previousSize.height;
-      setSize({ width, height });
+      _setSize({ width, height });
     }
     function onResizeEndBottomLeft(e) {
       const { pageX, pageY } = getComputedPagePosition(e, _boundary);
@@ -236,7 +231,7 @@ function useElementResize(ref, options) {
       const { pageX, pageY } = getComputedPagePosition(e, _boundary);
       const width = pageX - originMouseX + previousSize.width;
       const height = pageY - originMouseY + previousSize.height;
-      setSize({ width, height });
+      _setSize({ width, height });
     }
     function onResizeEndBottomRight(e) {
       const { pageX, pageY } = getComputedPagePosition(e, _boundary);
