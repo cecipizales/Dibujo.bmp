@@ -227,8 +227,6 @@ function WinXP() {
       defaultOffset: { ...appSetting.defaultOffset },
       defaultSize: { ...appSetting.defaultSize },
       header: { ...appSetting.header },
-      // Auto-maximize on small/medium screens
-      maximized: appSetting.maximized || window.innerWidth < 1100,
     };
 
     // Add random position perturbation so windows don't perfectly stack
@@ -297,7 +295,6 @@ function WinXP() {
         defaultOffset: { ...appSetting.defaultOffset },
         defaultSize: { ...appSetting.defaultSize },
         header: { ...appSetting.header },
-        maximized: appSetting.maximized || window.innerWidth < 1100,
       };
       const randomOffset = Math.floor(Math.random() * 40) - 20;
       payload.defaultOffset.x += randomOffset;
