@@ -6,18 +6,16 @@ const W = 1920;
 const H = 1080;
 
 // ─── Monitor screen area (pixel coords within the 1920×1080 canvas) ───────────
-// Measured from Screen-goes-here.png reference layer.
-// Tweak these values if WinXP appears offset inside the monitor.
+// These are calibrated from Screen-goes-here.png reference layer.
+// !! Set DEBUG_SCREEN = true to show the reference overlay for calibration !!
+const DEBUG_SCREEN = true;
+
 const SCREEN = {
   left:   568,
   top:    128,
   width:  340,
   height: 256,
 };
-
-// ─── Add keyboard here when keyboard.png is available in /public/setup/ ───────
-// const KEYBOARD = true;
-
 
 function Scene() {
   const [pos, setPos] = useState({ scale: 1, x: 0, y: 0 });
@@ -27,7 +25,6 @@ function Scene() {
       const vw = window.innerWidth;
       const vh = window.innerHeight;
       const scale = Math.min(vw / W, vh / H);
-      // Centre the scaled canvas inside the viewport
       const x = (vw - W * scale) / 2;
       const y = (vh - H * scale) / 2;
       setPos({ scale, x, y });
@@ -47,11 +44,6 @@ function Scene() {
       position: 'relative',
       background: '#111',
     }}>
-      {/*
-        The 1920×1080 canvas.
-        transform-origin: top left + manual x/y offset is the correct way
-        to scale a larger-than-viewport element without flex/scrollbar issues.
-      */}
       <div style={{
         position:        'absolute',
         top:             y,
@@ -63,28 +55,12 @@ function Scene() {
       }}>
 
         {/* ── z1: Desk / room background ─────────────────────────────── */}
-        <img
-          src="/setup/BG-base.png"
-          alt=""
-          draggable={false}
-          style={fullLayer(1)}
-        />
+        <img src="/setup/BG-base.png" alt="" draggable={false} style={fullLayer(1)} />
 
         {/* ── z2: Monitor frame ──────────────────────────────────────── */}
-        <img
-          src="/setup/Monitor.png"
-          alt="Monitor"
-          draggable={false}
-          style={fullLayer(2)}
-        />
+        <img src="/setup/Monitor.png" alt="Monitor" draggable={false} style={fullLayer(2)} />
 
-        {/*
-          ── z3: WinXP — sits ABOVE the monitor image ──────────────────
-          Positioned exactly at the screen area so it appears to live
-          inside the CRT, regardless of whether the monitor PNG screen
-          area is transparent or white.
-          overflow:hidden clips windows that would spill outside the screen.
-        */}
+        {/* ── z3: WinXP inside screen area ───────────────────────────── */}
         <div style={{
           position: 'absolute',
           left:     SCREEN.left,
@@ -97,28 +73,50 @@ function Scene() {
           <WinXP />
         </div>
 
-        {/* ── z4: Left speaker ───────────────────────────────────────── */}
-        <img
-          src="/setup/Speaker-left.png"
-          alt=""
-          draggable={false}
-          style={fullLayer(4)}
-        />
+        {/* ── z4: Keyboard ───────────────────────────────────────────── */}
+        <img src="/setup/keyboard.png" alt="" draggable={false} style={fullLayer(4)} />
 
-        {/* ── z5: Right speaker ──────────────────────────────────────── */}
-        <img
-          src="/setup/Speaker-right.png"
-          alt=""
-          draggable={false}
-          style={fullLayer(5)}
-        />
+        {/* ── z5: Left speaker ───────────────────────────────────────── */}
+        <img src="/setup/Speaker-left.png" alt="" draggable={false} style={fullLayer(5)} />
+
+        {/* ── z6: Right speaker ──────────────────────────────────────── */}
+        <img src="/setup/Speaker-right.png" alt="" draggable={false} style={fullLayer(6)} />
+
+        {/*
+          ── DEBUG: Screen-goes-here reference overlay (remove when aligned) ──
+          Shows the exact screen boundary from the reference PNG.
+          The red border box shows where code currently places WinXP.
+          When the two align, coordinates are correct.
+        */}
+        {DEBUG_SCREEN && (
+          <>
+            {/* Reference image: shows where screen SHOULD be */}
+            <img
+              src="/setup/Screen-goes-here.png"
+              alt="debug"
+              draggable={false}
+              style={{ ...fullLayer(10), opacity: 0.5 }}
+            />
+            {/* Red box: shows where WinXP IS being placed */}
+            <div style={{
+              position: 'absolute',
+              left:     SCREEN.left,
+              top:      SCREEN.top,
+              width:    SCREEN.width,
+              height:   SCREEN.height,
+              border:   '3px solid red',
+              zIndex:   11,
+              pointerEvents: 'none',
+              boxSizing: 'border-box',
+            }} />
+          </>
+        )}
 
       </div>
     </div>
   );
 }
 
-// Shared style for full-canvas layers (only z-index varies)
 function fullLayer(zIndex) {
   return {
     position:      'absolute',
@@ -128,7 +126,7 @@ function fullLayer(zIndex) {
     height:        H,
     zIndex,
     userSelect:    'none',
-    pointerEvents: 'none', // decorative layers don't block WinXP interaction
+    pointerEvents: 'none',
     display:       'block',
   };
 }
