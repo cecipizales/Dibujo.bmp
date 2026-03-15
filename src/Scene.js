@@ -1,67 +1,85 @@
 import React, { useState, useEffect } from 'react';
 import WinXP from 'WinXP';
 
-// ─── Screen area coordinates within the 1920×1080 canvas ──────────────────────
-// Measured from the "Screen goes here.png" reference asset.
-// The monitor's transparent screen hole sits at these pixel values.
+// ─── Canvas dimensions ────────────────────────────────────────────────────────
+const W = 1920;
+const H = 1080;
+
+// ─── Monitor screen area (pixel coords within the 1920×1080 canvas) ───────────
+// Measured from Screen-goes-here.png reference layer.
+// WinXP renders here, on top of the monitor image.
 const SCREEN = {
-  left: 566,
-  top:  120,
-  width:  344,
-  height: 263,
+  left:   563,
+  top:    120,
+  width:  346,
+  height: 264,
 };
 
 function Scene() {
-  const [scale, setScale] = useState(1);
+  const [pos, setPos] = useState({ scale: 1, x: 0, y: 0 });
 
-  // Keep scene scaled to fill the browser viewport at all times
   useEffect(() => {
-    function updateScale() {
-      const sx = window.innerWidth  / 1920;
-      const sy = window.innerHeight / 1080;
-      setScale(Math.min(sx, sy));
+    function calc() {
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      const scale = Math.min(vw / W, vh / H);
+      // Centre the scaled canvas inside the viewport
+      const x = (vw - W * scale) / 2;
+      const y = (vh - H * scale) / 2;
+      setPos({ scale, x, y });
     }
-    updateScale();
-    window.addEventListener('resize', updateScale);
-    return () => window.removeEventListener('resize', updateScale);
+    calc();
+    window.addEventListener('resize', calc);
+    return () => window.removeEventListener('resize', calc);
   }, []);
 
+  const { scale, x, y } = pos;
+
   return (
-    // Outer shell: fills the viewport, centers the composition
     <div style={{
-      width:      '100vw',
-      height:     '100vh',
-      overflow:   'hidden',
-      background: '#1a1a1a',
-      display:    'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
+      width:    '100vw',
+      height:   '100vh',
+      overflow: 'hidden',
+      position: 'relative',
+      background: '#111',
     }}>
       {/*
-        Inner canvas: always 1920×1080, scaled down/up uniformly.
-        All layers are absolutely positioned inside here.
+        The 1920×1080 canvas.
+        transform-origin: top left + manual x/y offset is the correct way
+        to scale a larger-than-viewport element without flex/scrollbar issues.
       */}
       <div style={{
-        position:        'relative',
-        width:           1920,
-        height:          1080,
-        flexShrink:      0,
+        position:        'absolute',
+        top:             y,
+        left:            x,
+        width:           W,
+        height:          H,
+        transformOrigin: 'top left',
         transform:       `scale(${scale})`,
-        transformOrigin: 'center center',
       }}>
 
-        {/* ── Layer 1 – Desk / room background ─────────────────────────── */}
+        {/* ── z1: Desk / room background ─────────────────────────────── */}
         <img
-          src="/setup/BG base.png"
+          src="/setup/BG-base.png"
           alt=""
           draggable={false}
-          style={layerStyle(1)}
+          style={fullLayer(1)}
         />
 
-        {/* ── Layer 2 – WinXP app, clipped to the monitor screen area ─────
-          Sits at z-index 2, directly behind the monitor frame (z-index 3).
-          The monitor PNG has a transparent hole where the screen is, so
-          the WinXP content shows through perfectly.
+        {/* ── z2: Monitor frame ──────────────────────────────────────── */}
+        <img
+          src="/setup/Monitor.png"
+          alt="Monitor"
+          draggable={false}
+          style={fullLayer(2)}
+        />
+
+        {/*
+          ── z3: WinXP — sits ABOVE the monitor image ──────────────────
+          Positioned exactly at the screen area so it appears to live
+          inside the CRT, regardless of whether the monitor PNG screen
+          area is transparent or white.
+          overflow:hidden clips windows that would spill outside the screen.
         */}
         <div style={{
           position: 'absolute',
@@ -70,33 +88,25 @@ function Scene() {
           width:    SCREEN.width,
           height:   SCREEN.height,
           overflow: 'hidden',
-          zIndex:   2,
+          zIndex:   3,
         }}>
           <WinXP />
         </div>
 
-        {/* ── Layer 3 – Monitor frame (transparent screen = WinXP shows through) */}
+        {/* ── z4: Left speaker ───────────────────────────────────────── */}
         <img
-          src="/setup/Monitor.png"
-          alt="Monitor"
-          draggable={false}
-          style={layerStyle(3)}
-        />
-
-        {/* ── Layer 4 – Left speaker ────────────────────────────────────── */}
-        <img
-          src="/setup/Speaker left.png"
+          src="/setup/Speaker-left.png"
           alt=""
           draggable={false}
-          style={layerStyle(4)}
+          style={fullLayer(4)}
         />
 
-        {/* ── Layer 5 – Right speaker ───────────────────────────────────── */}
+        {/* ── z5: Right speaker ──────────────────────────────────────── */}
         <img
-          src="/setup/Speaker right.png"
+          src="/setup/Speaker-right.png"
           alt=""
           draggable={false}
-          style={layerStyle(5)}
+          style={fullLayer(5)}
         />
 
       </div>
@@ -104,18 +114,18 @@ function Scene() {
   );
 }
 
-// Every full-canvas layer shares the same base style;
-// only z-index differs.
-function layerStyle(zIndex) {
+// Shared style for full-canvas layers (only z-index varies)
+function fullLayer(zIndex) {
   return {
-    position: 'absolute',
-    top:      0,
-    left:     0,
-    width:    1920,
-    height:   1080,
+    position:      'absolute',
+    top:           0,
+    left:          0,
+    width:         W,
+    height:        H,
     zIndex,
-    userSelect: 'none',
-    pointerEvents: zIndex === 3 ? 'none' : 'auto', // monitor frame is decorative
+    userSelect:    'none',
+    pointerEvents: 'none', // decorative layers don't block WinXP interaction
+    display:       'block',
   };
 }
 
