@@ -7,13 +7,17 @@ const H = 1080;
 
 // ─── Monitor screen area (pixel coords within the 1920×1080 canvas) ───────────
 // Measured from Screen-goes-here.png reference layer.
-// WinXP renders here, on top of the monitor image.
+// Tweak these values if WinXP appears offset inside the monitor.
 const SCREEN = {
-  left:   563,
-  top:    120,
-  width:  346,
-  height: 264,
+  left:   568,
+  top:    128,
+  width:  340,
+  height: 256,
 };
+
+// ─── Add keyboard here when keyboard.png is available in /public/setup/ ───────
+// const KEYBOARD = true;
+
 
 function Scene() {
   const [pos, setPos] = useState({ scale: 1, x: 0, y: 0 });
