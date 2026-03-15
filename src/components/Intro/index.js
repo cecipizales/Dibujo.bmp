@@ -23,7 +23,7 @@ const Intro = ({ onFinish }) => {
     let timerId;
 
     if (phase === 'start') {
-      // Wait for user interaction to satisfy browser autoplay policies for audio
+      // Waiting for user to click
     } else if (phase === 'today') {
       // Hold on today's date for 2 seconds
       timerId = setTimeout(() => {
@@ -60,28 +60,41 @@ const Intro = ({ onFinish }) => {
     return () => clearTimeout(timerId);
   }, [phase]);
 
-  // Attempt to play video precisely when phase switches to 'video'
-  useEffect(() => {
-    if (phase === 'video' && videoRef.current) {
-      const playPromise = videoRef.current.play();
-      if (playPromise !== undefined) {
-        playPromise.catch((error) => {
-          console.error("Auto-play was blocked or failed during phase video:", error);
-          if (!introFinishedRef.current) {
-            introFinishedRef.current = true;
-            onFinish(); // Instantly skip if video gets blocked
-          }
-        });
-      }
-    }
-  }, [phase, onFinish]);
-
   const safeFinish = () => {
     if (!introFinishedRef.current) {
       introFinishedRef.current = true;
       onFinish();
     }
   };
+
+  // Attempt to play video precisely when phase switches to 'video'
+  useEffect(() => {
+    if (phase === 'video' && videoRef.current) {
+      // Extremely strict fallback: if the video phase starts, give the browser
+      // a strict 6 second window to render the video. If the video hangs or is blocked
+      // and doesn't finish, jump to desktop automatically.
+      const fallbackTimer = setTimeout(() => {
+        console.warn('Video fallback timeout triggered (took too long or hung)');
+        safeFinish();
+      }, 6000);
+
+      try {
+        const playPromise = videoRef.current.play();
+        if (playPromise !== undefined) {
+          playPromise.catch((error) => {
+            console.error("Auto-play was blocked or failed during phase video:", error);
+            // Wait just a moment so it doesn't jarringly snap to desktop if blocked
+            setTimeout(() => { safeFinish(); }, 300);
+          });
+        }
+      } catch (err) {
+        console.error("Video play threw sync error:", err);
+        safeFinish();
+      }
+
+      return () => clearTimeout(fallbackTimer);
+    }
+  }, [phase, onFinish]);
 
   const handleVideoEnd = () => {
     console.log("Video ended normally.");
@@ -93,35 +106,32 @@ const Intro = ({ onFinish }) => {
     safeFinish();
   };
 
-  const handleSkip = () => {
+  const startSequence = () => {
     if (phase === 'start') {
-      // Direct user action tick.
-      // We UNLOCK the video element here so it's allowed to play unmuted later.
-      if (videoRef.current) {
-        videoRef.current.play().then(() => {
-          // Immediately pause it, we just wanted to unlock it and buffer
-          videoRef.current.pause();
-          videoRef.current.currentTime = 0;
-        }).catch(err => {
-          console.warn("Pre-play unlock failed, but continuing:", err);
-        });
-      }
-      setPhase('today'); // Initial click starts the animation
-    } else {
-      safeFinish(); // Any subsequent click skips the intro completely
+      setPhase('today');
     }
   };
 
   return (
-    <IntroContainer onClick={handleSkip}>
+    <IntroContainer>
+      {/* Absolute skip button to let them escape if they want */}
+      {phase !== 'start' && (
+        <SkipButton onClick={safeFinish}>[ SKIP INTRO ]</SkipButton>
+      )}
+
+      {/* Center content */}
       {phase === 'start' && (
-        <StartPrompt>[ CLICK TO INITIATE SEQUENCE ]</StartPrompt>
+        <StartPrompt onClick={startSequence}>
+          [ CLICK TO INITIATE SEQUENCE ]
+        </StartPrompt>
       )}
       {(phase === 'today' || phase === 'rewind') && (
         <DateDisplay>
           {displayDate}
         </DateDisplay>
       )}
+
+      {/* The video uses z-index and pointer-events to hide securely */}
       <VideoPlayer
         ref={videoRef}
         src="/load-desktop-animation.mp4"
@@ -131,7 +141,7 @@ const Intro = ({ onFinish }) => {
         style={{
           opacity: phase === 'video' ? 1 : 0,
           pointerEvents: phase === 'video' ? 'auto' : 'none',
-          position: phase === 'video' ? 'relative' : 'absolute'
+          zIndex: phase === 'video' ? 10 : -10
         }}
       />
     </IntroContainer>
@@ -150,15 +160,40 @@ const IntroContainer = styled.div`
   align-items: center;
   z-index: 999999;
   overflow: hidden;
-  cursor: pointer; /* Signal to user that they can click to skip */
 `;
 
-const StartPrompt = styled.div`
+const SkipButton = styled.button`
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  background: transparent;
+  border: none;
+  font-family: 'Courier New', Courier, monospace;
+  color: #555;
+  font-size: 14px;
+  cursor: pointer;
+  z-index: 100;
+
+  &:hover {
+    color: #fff;
+  }
+`;
+
+const StartPrompt = styled.button`
+  background: transparent;
+  border: none;
   font-family: 'Courier New', Courier, monospace;
   font-size: 2vw;
   color: #888;
   letter-spacing: 0.2em;
   animation: pulse 1.5s infinite;
+  cursor: pointer;
+  z-index: 50;
+
+  &:hover {
+    color: #fff;
+    animation: none;
+  }
 
   @media (max-width: 768px) {
     font-size: 4vw;
@@ -176,6 +211,7 @@ const DateDisplay = styled.div`
   color: #e0e0e0;
   letter-spacing: 0.15em;
   font-weight: normal;
+  z-index: 50;
   
   @media (max-width: 768px) {
     font-size: 8vw;
@@ -183,8 +219,11 @@ const DateDisplay = styled.div`
 `;
 
 const VideoPlayer = styled.video`
-  width: 100%;
-  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
   object-fit: cover;
   background-color: #000;
 `;
