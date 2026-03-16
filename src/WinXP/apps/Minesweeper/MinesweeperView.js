@@ -100,6 +100,10 @@ function MineSweeperView({
   const face = useRef(null);
   const [mouseDownContent, setMouseDownContent] = useState(false);
   const [openBehavior, setOpenBehavior] = useState({ index: -1, behavior: '' });
+
+  const longPressTimer = useRef(null);
+  const touchIsLongPress = useRef(false);
+  const touchTargetIndex = useRef(-1);
   function remainMines() {
     return (
       mines -
@@ -178,6 +182,84 @@ function MineSweeperView({
       openCeils(index);
     }
   }
+
+  function onTouchStartCeils(e) {
+    if (e.touches.length > 1) return;
+    const index = Array.prototype.indexOf.call(
+      e.currentTarget.children,
+      e.target.closest('.mine__ceil'),
+    );
+    if (index === -1) return;
+
+    touchTargetIndex.current = index;
+    touchIsLongPress.current = false;
+
+    setOpenBehavior({
+      index,
+      behavior: 'single',
+    });
+
+    longPressTimer.current = setTimeout(() => {
+      touchIsLongPress.current = true;
+      setOpenBehavior({ index: -1, behavior: '' });
+      changeCeilState(index);
+      if (window.navigator && window.navigator.vibrate) {
+        window.navigator.vibrate(50);
+      }
+    }, 400);
+  }
+
+  function onTouchMoveCeils(e) {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
+    const touch = e.touches[0];
+    const target = document.elementFromPoint(touch.clientX, touch.clientY);
+    let index = -1;
+    if (target) {
+      const ceil = target.closest('.mine__ceil');
+      if (ceil) {
+        index = Array.prototype.indexOf.call(e.currentTarget.children, ceil);
+      }
+    }
+
+    if (index !== touchTargetIndex.current) {
+      touchTargetIndex.current = index;
+      if (index !== -1 && !touchIsLongPress.current) {
+        setOpenBehavior({
+          index,
+          behavior: 'single',
+        });
+      } else {
+        setOpenBehavior({ index: -1, behavior: '' });
+      }
+    }
+  }
+
+  function onTouchEndCeils(e) {
+    if (e.cancelable) e.preventDefault();
+
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
+
+    const index = touchTargetIndex.current;
+    if (!touchIsLongPress.current && index !== -1) {
+      setOpenBehavior({ index: -1, behavior: '' });
+      const ceil = ceils[index];
+      // Mobile-friendly Chording: Tap an already exposed number to quickly dig around it 
+      if (ceil && ceil.state === 'open' && ceil.minesAround > 0) {
+        openCeils(index);
+      } else {
+        openCeil(index);
+      }
+    }
+
+    touchIsLongPress.current = false;
+    touchTargetIndex.current = -1;
+  }
   function onClickOptionItem(item) {
     switch (item) {
       case 'Exit':
@@ -236,6 +318,9 @@ function MineSweeperView({
           onMouseDown={onMouseDownCeils}
           onMouseOver={onMouseOverCeils}
           onMouseUp={onMouseUpCeils}
+          onTouchStart={onTouchStartCeils}
+          onTouchMove={onTouchMoveCeils}
+          onTouchEnd={onTouchEndCeils}
         >
           <Ceils ceils={ceils} />
         </div>
