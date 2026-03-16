@@ -158,15 +158,15 @@ function MineSweeperView({
       e.currentTarget.children,
       e.target.closest('.mine__ceil'),
     );
-    if (e.button === 0 && e.buttons === 1) {
-      setOpenBehavior({
-        index,
-        behavior: 'single',
-      });
-    } else if (e.buttons === 3) {
+    if (e.buttons === 3) {
       setOpenBehavior({
         index,
         behavior: 'multi',
+      });
+    } else if (e.button === 0) {
+      setOpenBehavior({
+        index,
+        behavior: 'single',
       });
     }
   }
@@ -433,6 +433,11 @@ export default styled(MineSweeperView)`
     border-left: rgb(128, 128, 128) solid 3px;
     border-right: rgb(245, 245, 245) solid 3px;
     border-bottom: rgb(245, 245, 245) solid 3px;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -webkit-touch-callout: none;
   }
   .mine__ceil {
     position: relative;
