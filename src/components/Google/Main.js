@@ -53,7 +53,7 @@ function Main({ onSearch, className }) {
       <footer>
         <section className="upper">
           <div className="items left">
-            <div className="item">Taiwan</div>
+            <div className="item">Argentina</div>
           </div>
         </section>
         <section className="lower">

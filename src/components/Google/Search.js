@@ -88,7 +88,7 @@ function Search({ className, goMain, onSearch, query }) {
       <footer>
         <section className="upper">
           <div className="footer-items left">
-            <div className="item">Taiwan</div>
+            <div className="item">Argentina</div>
           </div>
         </section>
         <section className="lower">

@@ -59,9 +59,6 @@ function useElementResize(ref, options) {
     let shouldCover = false;
 
     function onDragging(e) {
-      if (shouldCover && !document.body.contains(cover)) {
-        document.body.appendChild(cover);
-      }
       const { pageX, pageY } = getComputedPagePosition(e, _boundary);
       const x = pageX - originMouseX + previousOffset.x;
       const y = pageY - originMouseY + previousOffset.y;
@@ -87,6 +84,8 @@ function useElementResize(ref, options) {
       _setOffset({ x, y });
     }
     function onDragEndTop(e) {
+      cover.remove();
+      shouldCover = false;
       const { pageY } = getComputedPagePosition(e, _boundary);
       previousOffset.y += pageY - originMouseY;
       window.removeEventListener('mousemove', onDraggingTop);
@@ -103,6 +102,8 @@ function useElementResize(ref, options) {
       _setOffset({ x, y });
     }
     function onDragEndLeft(e) {
+      cover.remove();
+      shouldCover = false;
       const { pageX } = getComputedPagePosition(e, _boundary);
       previousOffset.x += pageX - originMouseX;
       window.removeEventListener('mousemove', onDraggingLeft);
@@ -119,6 +120,8 @@ function useElementResize(ref, options) {
       _setSize({ width, height });
     }
     function onResizeEndRight(e) {
+      cover.remove();
+      shouldCover = false;
       const { pageX } = getComputedPagePosition(e, _boundary);
       previousSize.width += pageX - originMouseX;
       window.removeEventListener('mousemove', onResizingRight);
@@ -135,6 +138,8 @@ function useElementResize(ref, options) {
       _setSize({ width, height });
     }
     function onResizeEndBottom(e) {
+      cover.remove();
+      shouldCover = false;
       const { pageY } = getComputedPagePosition(e, _boundary);
       previousSize.height += pageY - originMouseY;
       window.removeEventListener('mousemove', onResizingBottom);
@@ -151,6 +156,8 @@ function useElementResize(ref, options) {
       _setSize({ width, height });
     }
     function onResizeEndLeft(e) {
+      cover.remove();
+      shouldCover = false;
       const { pageX } = getComputedPagePosition(e, _boundary);
       previousSize.width += -pageX + originMouseX;
       window.removeEventListener('mousemove', onResizingLeft);
@@ -167,6 +174,8 @@ function useElementResize(ref, options) {
       _setSize({ width, height });
     }
     function onResizeEndTop(e) {
+      cover.remove();
+      shouldCover = false;
       const { pageY } = getComputedPagePosition(e, _boundary);
       previousSize.height += -pageY + originMouseY;
       window.removeEventListener('mousemove', onResizingTop);
@@ -183,6 +192,8 @@ function useElementResize(ref, options) {
       _setSize({ width, height });
     }
     function onResizeEndTopLeft(e) {
+      cover.remove();
+      shouldCover = false;
       const { pageX, pageY } = getComputedPagePosition(e, _boundary);
       previousSize.width += -pageX + originMouseX;
       previousSize.height += -pageY + originMouseY;
@@ -200,6 +211,8 @@ function useElementResize(ref, options) {
       _setSize({ width, height });
     }
     function onResizeEndTopRight(e) {
+      cover.remove();
+      shouldCover = false;
       const { pageX, pageY } = getComputedPagePosition(e, _boundary);
       previousSize.width += pageX - originMouseX;
       previousSize.height += -pageY + originMouseY;
@@ -217,6 +230,8 @@ function useElementResize(ref, options) {
       _setSize({ width, height });
     }
     function onResizeEndBottomLeft(e) {
+      cover.remove();
+      shouldCover = false;
       const { pageX, pageY } = getComputedPagePosition(e, _boundary);
       previousSize.width += -pageX + originMouseX;
       previousSize.height += pageY - originMouseY;
@@ -234,6 +249,8 @@ function useElementResize(ref, options) {
       _setSize({ width, height });
     }
     function onResizeEndBottomRight(e) {
+      cover.remove();
+      shouldCover = false;
       const { pageX, pageY } = getComputedPagePosition(e, _boundary);
       previousSize.width += pageX - originMouseX;
       previousSize.height += pageY - originMouseY;
@@ -248,11 +265,21 @@ function useElementResize(ref, options) {
       originMouseX = e.pageX;
       originMouseY = e.pageY;
       _boundary = { ...boundary };
-      if (dragTarget && e.target === dragTarget) {
+
+      const isDrag = dragTarget && e.target === dragTarget;
+      const isResize = e.target === target && resizable && cursorPos !== '';
+
+      if (isDrag || isResize) {
         shouldCover = true;
+        if (!document.body.contains(cover)) {
+          document.body.appendChild(cover);
+        }
+      }
+
+      if (isDrag) {
         return onDragStart(e);
       }
-      if (e.target !== target || !resizable) return;
+      if (!isResize) return;
       switch (cursorPos) {
         case 'topLeft':
           _boundary.right = originMouseX + previousSize.width - constraintSize;
